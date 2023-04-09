@@ -19,4 +19,4 @@
 
 ## Installation
 - Grab the latest release of Spiritfall Ultra-Wide Fix from [here.](https://github.com/p1xel8ted/Spiritfall/releases)
-- Extract the contents of the release zip in to the game directory.<br />(e.g. "**steamapps\common\Spiritfall**" for Steam).
+- Extract the contents of the release zip into the game directory.<br />(e.g. "**steamapps\common\Spiritfall**" for Steam).
