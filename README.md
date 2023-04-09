@@ -11,9 +11,8 @@
 - Options to toggle all the marketing buttons (Twitter, Discord, etc).
 - Option to re-enable the 'Quit to Desktop' button in the pause menu (hidden by default).
 
-## Note
-- Comes bundled with ConfigurationManager allowing you to press F2 and change mod settings ingame.
-- Press NumpadPlus and NumpadMinus to fine tune zoom. NumpadMultiply(Star) will reset to original.
+## Configuration
+- Found in "**steamapps\common\Spiritfall\BepInEx\config\p1xel8ted.spiritfall.ultrawide.cfg**" 
 
 ## Installation
 - Grab the latest release of Spiritfall Ultra-Wide Fix from [here.](https://github.com/p1xel8ted/Spiritfall/releases)
