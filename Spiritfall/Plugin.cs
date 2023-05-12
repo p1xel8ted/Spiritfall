@@ -25,11 +25,12 @@ public partial class Plugin : BaseUnityPlugin
     /// The logging source for this plugin.
     /// </summary>
     internal static ManualLogSource Log { get; private set; }
-    private static Harmony _harmony;
 
-    private static ConfigEntry<bool> _modEnabled;
-    private static Dictionary<string, ConfigEntry<bool>> _uiElements;
-    private static ConfigEntry<bool> _quitToDesktop;
+    private static Harmony Harmony { get; set; }
+
+    private static ConfigEntry<bool> ModEnabled { get; set; }
+    private static Dictionary<string, ConfigEntry<bool>> UIElements { get; set; } = new();
+    private static ConfigEntry<bool> QuitToDesktop { get; set; }
 
     /// <summary>
     /// Invoked when the <see cref="Plugin"/> is loaded. It initializes the log, harmony patches and the configuration.
@@ -37,7 +38,7 @@ public partial class Plugin : BaseUnityPlugin
     private void Awake()
     {
         Log = Logger;
-        _harmony = new Harmony(PluginGuid);
+        Harmony = new Harmony(PluginGuid);
         InitConfiguration();
         ApplyPatches(this, null);
     }
@@ -50,10 +51,9 @@ public partial class Plugin : BaseUnityPlugin
         SceneManager.sceneLoaded += OnSceneLoaded;
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
 
-        _modEnabled = Config.Bind("1. General", "Enabled", true, $"Toggle {PluginName}");
-        _modEnabled.SettingChanged += ApplyPatches;
-
-        _uiElements = new Dictionary<string, ConfigEntry<bool>>
+        ModEnabled = Config.Bind("1. General", "Enabled", true, $"Toggle {PluginName}");
+        ModEnabled.SettingChanged += ApplyPatches;
+        UIElements = new Dictionary<string, ConfigEntry<bool>>
         {
             {"WelcomePopup", Config.Bind("2. Main Menu Tweaks", "WelcomePopup", false, "Toggle Welcome Popup")},
             {
@@ -67,10 +67,11 @@ public partial class Plugin : BaseUnityPlugin
             {"CreditsButton", Config.Bind("2. Main Menu Tweaks", "CreditsButton", true, "Toggle Credits Button")}
         };
 
-        _quitToDesktop = Config.Bind("3. In Game Tweaks", "QuitToDesktop", true,
+
+        QuitToDesktop = Config.Bind("3. In Game Tweaks", "QuitToDesktop", true,
             "Re-enables the Quit to Desktop button in the pause menu. (It's hidden by default)");
 
-        foreach (var uiElement in _uiElements.Values)
+        foreach (var uiElement in UIElements.Values)
         {
             uiElement.SettingChanged += ToggleAll;
         }
@@ -105,7 +106,7 @@ public partial class Plugin : BaseUnityPlugin
     /// </summary>
     private static void ToggleAll(object sender, EventArgs eventArgs)
     {
-        if (_uiElements.Values.Any(a => a.Value))
+        if (UIElements.Values.Any(a => a.Value))
         {
             var uiElementPaths = new Dictionary<string, string>
             {
@@ -117,7 +118,7 @@ public partial class Plugin : BaseUnityPlugin
                 {"RoadmapButton", "CanvasMainMenu/MenuPanel/Content/Roadmap"},
                 {"CreditsButton", "CanvasMainMenu/MenuPanel/Content/Credits"}
             };
-            foreach (var uiElement in _uiElements)
+            foreach (var uiElement in UIElements)
             {
                 var gameObject = GetGameObject(uiElementPaths[uiElement.Key]);
                 if (gameObject != null)
@@ -130,16 +131,16 @@ public partial class Plugin : BaseUnityPlugin
                 GetGameObject("CanvasPauseMenu/PauseMenu/Content/MarketingButtons/TwitterButton");
             if (pauseMenuTwitterButton != null)
             {
-                pauseMenuTwitterButton.SetActive(_uiElements["TwitterButton"].Value);
+                pauseMenuTwitterButton.SetActive(UIElements["TwitterButton"].Value);
             }
 
-            if (!_uiElements["FeedbackButton"].Value)
+            if (!UIElements["FeedbackButton"].Value)
             {
                 RemoveFeedbackButtonInPauseMenu();
             }
         }
 
-        if (_quitToDesktop.Value)
+        if (QuitToDesktop.Value)
         {
             var pauseMenuQuitButton = GetGameObject("CanvasPauseMenu/PauseMenu/Content/Quit");
             if (pauseMenuQuitButton != null)
@@ -152,7 +153,6 @@ public partial class Plugin : BaseUnityPlugin
 
         void RemoveFeedbackButtonInPauseMenu()
         {
-
             var pauseMenuFeedBack = GetGameObject("CanvasPauseMenu/PauseMenu/Content/Feedback");
             if (pauseMenuFeedBack != null)
             {
@@ -178,15 +178,15 @@ public partial class Plugin : BaseUnityPlugin
     /// </summary>
     private static void ApplyPatches(object sender, EventArgs e)
     {
-        if (_modEnabled.Value)
+        if (ModEnabled.Value)
         {
             Log.LogInfo($"Applying patches for {PluginName}");
-            _harmony.PatchAll(Assembly.GetExecutingAssembly());
+            Harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
         else
         {
             Log.LogInfo($"Removing patches for {PluginName}");
-            _harmony.UnpatchSelf();
+            Harmony.UnpatchSelf();
         }
     }
 }
