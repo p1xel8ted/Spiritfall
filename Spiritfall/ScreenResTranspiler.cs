@@ -23,7 +23,7 @@ public static class ScreenResolutionsPatch
     /// <summary>
     /// Gets or sets the list of supported refresh rates.
     /// </summary>
-    internal static List<int> SupportRefresh { get; private set; }
+    internal static List<int> SupportRefresh { get; private set; } = new();
 
     /// <summary>
     /// Provides a list of screen resolutions, including custom ones based on the main display.
@@ -35,18 +35,19 @@ public static class ScreenResolutionsPatch
     public static Resolution[] MyResolutions()
     {
         Plugin.Log.LogWarning("Unity Screen.resolutions intercepted!");
+
+        VectorResolutions.Clear();
+        SupportRefresh.Clear();
+        
         SupportRefresh = Screen.resolutions.Select(a => a.refreshRate).Distinct().ToList();
         var availableResolutions = Screen.resolutions.ToList();
         availableResolutions.AddRange(SupportRefresh.Select(refreshRate => new Resolution {height = Display.main.systemHeight, width = Display.main.systemWidth, refreshRate = refreshRate}));
-
         foreach (var res in availableResolutions)
         {
             VectorResolutions.Add(new Vector2Int(res.width, res.height));
-            Plugin.Log.LogWarning($"Resolution: {res.width}x{res.height} @ {res.refreshRate}Hz");
         }
 
         VectorResolutions = VectorResolutions.Distinct().ToList();
-
         return availableResolutions.ToArray();
     }
 
