@@ -6,26 +6,34 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Spiritfall;
 
+/// <summary>
+/// A BepInEx plugin that provides a set of ultra-wide fixes and tweaks for the game Spiritfall.
+/// </summary>
 [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
 public partial class Plugin : BaseUnityPlugin
 {
     private const string PluginGuid = "p1xel8ted.spiritfall.ultrawide";
     private const string PluginName = "Spiritfall Ultra-Wide Fixes & Tweaks";
-    private const string PluginVersion = "0.0.1";
+    private const string PluginVersion = "0.0.2";
 
-    private static ManualLogSource Log { get; set; }
+    /// <summary>
+    /// The logging source for this plugin.
+    /// </summary>
+    internal static ManualLogSource Log { get; private set; }
     private static Harmony _harmony;
 
     private static ConfigEntry<bool> _modEnabled;
     private static Dictionary<string, ConfigEntry<bool>> _uiElements;
     private static ConfigEntry<bool> _quitToDesktop;
 
+    /// <summary>
+    /// Invoked when the <see cref="Plugin"/> is loaded. It initializes the log, harmony patches and the configuration.
+    /// </summary>
     private void Awake()
     {
         Log = Logger;
@@ -34,6 +42,9 @@ public partial class Plugin : BaseUnityPlugin
         ApplyPatches(this, null);
     }
 
+    /// <summary>
+    /// Initializes configuration entries and binds scene event handlers.
+    /// </summary>
     private void InitConfiguration()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -65,23 +76,33 @@ public partial class Plugin : BaseUnityPlugin
         }
     }
 
+    /// <summary>
+    /// Handler for the scene change event. Invokes UI element toggling.
+    /// </summary>
     private void OnActiveSceneChanged(Scene arg0, Scene arg1)
     {
-        Log.LogInfo("Active scene changed. Old: " + arg0.name + " New: " + arg1.name);
         ToggleAll(this, null);
     }
 
+    /// <summary>
+    /// Handler for the scene loaded event. Invokes UI element toggling.
+    /// </summary>
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
-        Log.LogInfo("Scene loaded. Scene: " + arg0.name + " Mode: " + arg1);
         ToggleAll(this, null);
     }
 
+    /// <summary>
+    /// Fetches a <see cref="GameObject"/> from the current scene based on its name.
+    /// </summary>
     private static GameObject GetGameObject(string name)
     {
         return GameObject.Find(name);
     }
 
+    /// <summary>
+    /// Toggles visibility of all UI elements according to their configuration entries.
+    /// </summary>
     private static void ToggleAll(object sender, EventArgs eventArgs)
     {
         if (_uiElements.Values.Any(a => a.Value))
@@ -152,6 +173,9 @@ public partial class Plugin : BaseUnityPlugin
         }
     }
 
+    /// <summary>
+    /// Apply or remove harmony patches based on the _modEnabled configuration entry.
+    /// </summary>
     private static void ApplyPatches(object sender, EventArgs e)
     {
         if (_modEnabled.Value)
